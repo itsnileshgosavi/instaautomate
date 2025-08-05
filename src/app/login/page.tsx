@@ -1,8 +1,16 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
+  const { data: session } = useSession();
+
+  if (session) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-yellow-50 to-purple-200">
       <div className="p-8 rounded-xl bg-white shadow-2xl flex flex-col items-center">
