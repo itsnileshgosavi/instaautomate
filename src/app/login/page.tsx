@@ -7,9 +7,7 @@ import { redirect } from "next/navigation";
 export default function LoginPage() {
  const session = useSession();
 
-  if (session?.data?.user) {
-    redirect("/");
-  }
+ console.log(session)
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-yellow-50 to-purple-200">
