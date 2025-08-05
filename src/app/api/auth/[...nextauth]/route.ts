@@ -1,5 +1,6 @@
 import NextAuth, { DefaultSession, JWT } from "next-auth";
 import InstagramProvider from "next-auth/providers/instagram";
+import prisma from "@/lib/prisma";
 
 declare module "next-auth" {
   interface Session {
@@ -17,8 +18,7 @@ const handler = NextAuth({
       clientSecret: process.env.INSTAGRAM_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope:
-            "instagram_business_basic",
+          scope: "instagram_business_basic",
         },
       },
     }),
@@ -27,6 +27,27 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "instagram") {
+        //search user in db by instagram id
+        const dbUser = await prisma.user.findUnique({
+          where: {
+            instagramId: user.id,
+          },
+        });
+        if (!dbUser) {
+          await prisma.user.create({
+            data: {
+              instagramId: user.id,
+              name: user.name,
+              email: user.email,
+            },
+          });
+        }
+        return true;
+      }
+      return false;
+    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
