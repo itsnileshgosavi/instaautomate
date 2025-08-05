@@ -5,9 +5,11 @@ import prisma from "@/lib/prisma";
 declare module "next-auth" {
   interface Session {
     accessToken?: string;
+    refreshToken?: string;
   }
   interface JWT {
     accessToken?: string;
+    refreshToken?: string;
   }
 }
 
@@ -41,6 +43,8 @@ const handler = NextAuth({
               instagramId: user.id,
               name: user.name,
               email: user.email,
+              accessToken: account.access_token,
+              refreshToken: account.refresh_token,
             },
           });
         }
@@ -51,11 +55,13 @@ const handler = NextAuth({
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
       }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
       return session;
     },
   },
