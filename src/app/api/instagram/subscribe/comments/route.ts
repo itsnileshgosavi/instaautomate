@@ -41,13 +41,10 @@ export async function POST(req: NextRequest) {
         // Subscribe to Instagram webhook
         try {
             const response = await axios.post(
-                `https://graph.instagram.com/v18.0/${user.instagramId}/subscriptions`,
+                `https://graph.instagram.com/v23.0/${user.instagramId}/subscribed_apps`,
                 new URLSearchParams({
                     access_token: user.accessToken,
-                    object: 'instagram',
-                    aspect: 'media',
-                    verify_token: process.env.INSTAGRAM_VERIFY_TOKEN || 'your_verify_token',
-                    callback_url: `${process.env.NEXTAUTH_URL}/api/instagram/webhook`
+                    subscribed_fields: 'comments,messages',
                 }),
                 {
                     headers: {
