@@ -62,9 +62,7 @@ export default function Home() {
   // Form state
   const [editing, setEditing] = useState<AutomationRule | null>(null);
 
-  const form = useForm<
-    z.infer<typeof automationRuleSchema>
-  >({
+  const form = useForm<z.infer<typeof automationRuleSchema>>({
     resolver: zodResolver(automationRuleSchema),
     defaultValues: {
       triggerType: "message",
@@ -72,7 +70,7 @@ export default function Home() {
       replyText: "",
       isActive: true,
     },
-    mode:'onChange'
+    mode: "onChange",
   });
 
   const onSubmit = async (values: AutomationRuleInput) => {
@@ -102,6 +100,17 @@ export default function Home() {
     refetch();
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading automation rules...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
@@ -116,7 +125,9 @@ export default function Home() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Insta-Automate
                 </h1>
-                <p className="text-sm text-slate-600">Instagram Automation Platform</p>
+                <p className="text-sm text-slate-600">
+                  Instagram Automation Platform
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -153,14 +164,19 @@ export default function Home() {
                       {editing ? "Edit Rule" : "Create Rule"}
                     </CardTitle>
                     <p className="text-sm text-slate-600 mt-1">
-                      {editing ? "Modify your automation" : "Set up a new automation"}
+                      {editing
+                        ? "Modify your automation"
+                        : "Set up a new automation"}
                     </p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <FormProvider {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
                     <div className="space-y-5">
                       <FormField<AutomationRuleInput>
                         control={form.control}
@@ -185,7 +201,7 @@ export default function Home() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField<AutomationRuleInput>
                         control={form.control}
                         name="triggerWord"
@@ -207,7 +223,7 @@ export default function Home() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField<AutomationRuleInput>
                         control={form.control}
                         name="replyText"
@@ -222,14 +238,14 @@ export default function Home() {
                                 placeholder="Your automated response"
                                 className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
                                 {...field}
-                                value={field.value as string || ""}
+                                value={(field.value as string) || ""}
                               />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField<AutomationRuleInput>
                         control={form.control}
                         name="isActive"
@@ -241,14 +257,22 @@ export default function Home() {
                                   Rule Status
                                 </FormLabel>
                                 <p className="text-xs text-slate-500 mt-1">
-                                  {field.value ? "Rule is active and will trigger" : "Rule is paused"}
+                                  {field.value
+                                    ? "Rule is active and will trigger"
+                                    : "Rule is paused"}
                                 </p>
                               </div>
                               <FormControl>
                                 <Switch
                                   id="isActive"
-                                  checked={typeof field.value === "boolean" ? field.value : false}
-                                  onChange={(e) => field.onChange(e.target.checked)}
+                                  checked={
+                                    typeof field.value === "boolean"
+                                      ? field.value
+                                      : false
+                                  }
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
                                   name={field.name}
                                   onBlur={field.onBlur}
                                   ref={field.ref}
@@ -260,10 +284,10 @@ export default function Home() {
                         )}
                       />
                     </div>
-                    
+
                     <div className="flex gap-3 pt-4">
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         disabled={isCreating || isUpdating}
                         className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
@@ -300,14 +324,19 @@ export default function Home() {
             <div className="mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800">Automation Rules</h2>
+                  <h2 className="text-2xl font-bold text-slate-800">
+                    Automation Rules
+                  </h2>
                   <p className="text-slate-600 mt-1">
-                    {automations.length} {automations.length === 1 ? 'rule' : 'rules'} configured
+                    {automations?.length}{" "}
+                    {automations?.length === 1 ? "rule" : "rules"} configured
                   </p>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-slate-600">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>{automations.filter(rule => rule.isActive).length} active</span>
+                  <span>
+                    {automations?.filter((rule) => rule.isActive).length} active
+                  </span>
                 </div>
               </div>
             </div>
@@ -317,32 +346,42 @@ export default function Home() {
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
                     <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading automation rules...</p>
+                    <p className="text-slate-600">
+                      Loading automation rules...
+                    </p>
                   </div>
                 </div>
-              ) : automations.length === 0 ? (
+              ) : automations?.length === 0 ? (
                 <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
                       <span className="text-2xl">🤖</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">No automation rules yet</h3>
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                      No automation rules yet
+                    </h3>
                     <p className="text-slate-600 text-center max-w-md">
-                      Create your first automation rule to start automatically responding to messages and comments.
+                      Create your first automation rule to start automatically
+                      responding to messages and comments.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
                 automations.map((rule) => (
-                  <Card key={rule.id} className="shadow-lg border-0 bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-200">
+                  <Card
+                    key={rule.id}
+                    className="shadow-lg border-0 bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-200"
+                  >
                     <CardHeader className="pb-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            rule.triggerType === "message" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-purple-100 text-purple-600"
-                          }`}>
+                          <div
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              rule.triggerType === "message"
+                                ? "bg-blue-100 text-blue-600"
+                                : "bg-purple-100 text-purple-600"
+                            }`}
+                          >
                             <span className="text-lg">
                               {rule.triggerType === "message" ? "📱" : "💬"}
                             </span>
@@ -350,18 +389,26 @@ export default function Home() {
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
                               <CardTitle className="text-lg font-semibold text-slate-800">
-                                {rule.triggerType === "message" ? "Message" : "Comment"} Automation
+                                {rule.triggerType === "message"
+                                  ? "Message"
+                                  : "Comment"}{" "}
+                                Automation
                               </CardTitle>
-                              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                rule.isActive 
-                                  ? "bg-green-100 text-green-700" 
-                                  : "bg-gray-100 text-gray-600"
-                              }`}>
+                              <div
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  rule.isActive
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-600"
+                                }`}
+                              >
                                 {rule.isActive ? "Active" : "Paused"}
                               </div>
                             </div>
                             <p className="text-sm text-slate-600">
-                              Triggers when text contains: <span className="font-semibold text-slate-800">"{rule.triggerWord}"</span>
+                              Triggers when text contains:{" "}
+                              <span className="font-semibold text-slate-800">
+                                "{rule.triggerWord}"
+                              </span>
                             </p>
                           </div>
                         </div>
@@ -389,7 +436,9 @@ export default function Home() {
                     <CardContent className="pt-0">
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <div className="flex items-start space-x-2">
-                          <span className="text-slate-500 text-sm font-medium mt-0.5">Reply:</span>
+                          <span className="text-slate-500 text-sm font-medium mt-0.5">
+                            Reply:
+                          </span>
                           <p className="text-slate-800 text-sm flex-1 leading-relaxed">
                             "{rule.replyText}"
                           </p>
