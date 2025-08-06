@@ -37,16 +37,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Parse request body
-        let body;
-        try {
-            body = await req.json();
-        } catch (error) {
-            return NextResponse.json(
-                { error: "Invalid JSON payload" },
-                { status: 400 }
-            );
-        }
 
         // Subscribe to Instagram webhook
         try {
