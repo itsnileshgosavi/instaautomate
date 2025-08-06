@@ -8,15 +8,27 @@ declare module "next-auth" {
     user: {
       id: string;
       instagramId: string;
-    } & DefaultSession["user"];
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
   }
+  
   interface JWT {
     accessToken?: string;
     refreshToken?: string;
     instagramId?: string;
+    id?: string;
+    name?: string | null;
+    email?: string | null;
   }
+  
   interface User {
+    id: string;
     instagramId: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
   }
 }
 

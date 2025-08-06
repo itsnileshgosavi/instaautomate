@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import axios from "axios";
 import { getServerAuthSession } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
 
 export async function POST(req: NextRequest) {
     try {
-        const session = await getServerAuthSession();
-        
+        const session = await getServerSession(authOptions);
+        console.log(session)
         if (!session?.user?.instagramId) {
             return NextResponse.json(
                 { error: "User insta id not found" },

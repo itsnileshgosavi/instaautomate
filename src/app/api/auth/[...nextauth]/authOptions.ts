@@ -43,21 +43,34 @@ const authOptions: AuthOptions = {
         return false;
       },
       async jwt({ token, account, user }) {
-        if (account) {
-          token.accessToken = account.access_token;
-          token.refreshToken = account.refresh_token;
-          token.id = account.providerAccountId;
-          token.instagramId = user.id;
+        // Initial sign in
+        if (account && user) {
+          return {
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            id: account.providerAccountId,
+            instagramId: user.id,
+            name: user.name,
+            email: user.email,
+            ...token
+          };
         }
+        
+        // Return previous token if the current token has not expired
         return token;
       },
-      async session({ session, token, user }) {
-        session.accessToken = token.accessToken as string;
-        session.refreshToken = token.refreshToken as string;
-        if (session.user) {
-          session.user.id = token.id as string;
-          session.user.instagramId = user.id;
+      async session({ session, token }) {
+        // Send properties to the client
+        if (token) {
+          session.accessToken = token.accessToken as string;
+          session.refreshToken = token.refreshToken as string;
+          if (session.user) {
+            session.user.id = token.id as string;
+            session.user.instagramId = token.instagramId as string;
+            session.user.name = token.name as string;
+            session.user.email = token.email as string;
           }
+        }
         return session;
       },
     },
