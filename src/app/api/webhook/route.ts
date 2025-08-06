@@ -53,18 +53,18 @@ async function handleMessageEvent(event: any) {
 
     // Get your IG business user from DB using recipient.id
     const businessUser = await prisma.user.findFirst({
-      where: { instagramId: recipient.id },
-      select: { instagramId: true, accessToken: true }
+      where: { instaUserId: recipient.id },
+      select: { instaUserId: true, accessToken: true }
     });
 
-    if (!businessUser?.accessToken || !businessUser?.instagramId) {
+    if (!businessUser?.accessToken || !businessUser?.instaUserId) {
       console.error('No access token or IG user ID found for business account:', recipient.id);
       return;
     }
 
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
     await instagramApi.sendMessage({
-      senderIgUserId: businessUser.instagramId,
+      senderIgUserId: businessUser.instaUserId,
       recipientId: sender.id,
       message: 'Hi! Thanks for your message. Please follow us for more updates!',
       accessToken: businessUser.accessToken
@@ -87,7 +87,7 @@ async function handleCommentEvent(commentData: any) {
     // Get the page access token from database
     // Note: You'll need to store the page access token for your Instagram account
     const user = await prisma.user.findFirst({
-      where: { instagramId: from.id },
+      where: { instaUserId: from.id },
       select: { accessToken: true }
     });
 
