@@ -51,12 +51,12 @@ const authOptions: AuthOptions = {
         }
         return token;
       },
-      async session({ session, token }) {
+      async session({ session, token, user }) {
         session.accessToken = token.accessToken as string;
         session.refreshToken = token.refreshToken as string;
         if (session.user) {
           session.user.id = token.id as string;
-          session.user.instagramId = token.instagramId as string;
+          session.user.instagramId = user.id;
           }
         return session;
       },
