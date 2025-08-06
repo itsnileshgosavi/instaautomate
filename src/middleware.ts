@@ -6,6 +6,10 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
+  if (pathname === '/webhook') {
+    return NextResponse.next();
+  }
+
   // Redirect to login if not authenticated and trying to access protected routes
   if (!token && pathname !== '/login') {
     const loginUrl = new URL('/login', request.url);
