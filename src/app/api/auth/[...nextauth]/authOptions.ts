@@ -2,6 +2,7 @@ import InstagramProvider from "next-auth/providers/instagram";
 import prisma from "@/lib/prisma";
 import { getLongLIvedToken } from "@/services/getLongLIvedToken";
 import { AuthOptions } from "next-auth";
+import { getInstagramBusinessAccount } from "@/services/getInstaAccount";
 const authOptions: AuthOptions = {
     providers: [
       InstagramProvider({
@@ -28,6 +29,7 @@ const authOptions: AuthOptions = {
           });
           if (!dbUser && account.access_token) {
             const longLivedToken = await getLongLIvedToken(account.access_token);
+            const {instaUserId, username} = await getInstagramBusinessAccount(account.access_token);
             await prisma.user.create({
               data: {
                 instagramId: user.id,
@@ -35,6 +37,8 @@ const authOptions: AuthOptions = {
                 email: user.email,
                 accessToken: longLivedToken,
                 refreshToken: account.refresh_token,
+                instaUserId: instaUserId,
+                instagramUsername:username
               },
             });
           }
