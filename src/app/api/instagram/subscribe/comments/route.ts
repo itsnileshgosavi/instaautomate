@@ -46,11 +46,6 @@ export async function POST(req: NextRequest) {
                     access_token: user.accessToken,
                     subscribed_fields: 'comments,messages',
                 }),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                }
             );
 
             if (response.status !== 200) {
