@@ -8,40 +8,91 @@ import authOptions from "@/app/api/auth/[...nextauth]/authOptions";
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        console.log(session)
+        
         if (!session?.user?.instagramId) {
             return NextResponse.json(
-                { error: "User insta id not found" },
+                { error: "User not authenticated" },
                 { status: 401 }
             );
         }
 
-        // You can access the user's access token like this:
+        // Get user from database
         const user = await prisma.user.findUnique({
             where: {
-                instagramId: session?.user?.instagramId,
+                instagramId: session.user.instagramId,
             },
         });
+
         if (!user) {
             return NextResponse.json(
-                { error: "User not found" },
+                { error: "User not found in database" },
                 { status: 404 }
             );
         }
-        
-        const body = await req.json();
-        const subscribe = await axios.post(`htpps://graph.instagram.com/v23.0/${user.instagramId}/subscribed_apps?subscribed_fields=comments&access_token=${user.accessToken}`)
-        
-        // Process the webhook payload here
-        // For now, we'll just return a success response
-        return NextResponse.json({ 
-            success: true,
-            message: "Subscribed to comments successfully"
-        });
+
+        if (!user.accessToken) {
+            return NextResponse.json(
+                { error: "No access token found for user" },
+                { status: 400 }
+            );
+        }
+
+        // Parse request body
+        let body;
+        try {
+            body = await req.json();
+        } catch (error) {
+            return NextResponse.json(
+                { error: "Invalid JSON payload" },
+                { status: 400 }
+            );
+        }
+
+        // Subscribe to Instagram webhook
+        try {
+            const response = await axios.post(
+                `https://graph.instagram.com/v18.0/${user.instagramId}/subscriptions`,
+                new URLSearchParams({
+                    access_token: user.accessToken,
+                    object: 'instagram',
+                    aspect: 'media',
+                    verify_token: process.env.INSTAGRAM_VERIFY_TOKEN || 'your_verify_token',
+                    callback_url: `${process.env.NEXTAUTH_URL}/api/instagram/webhook`
+                }),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                }
+            );
+
+            if (response.status !== 200) {
+                throw new Error(`Instagram API returned status ${response.status}`);
+            }
+
+            return NextResponse.json({ 
+                success: true,
+                message: "Successfully subscribed to Instagram webhook",
+                data: response.data
+            });
+            
+        } catch (error: any) {
+            console.error("Error subscribing to Instagram webhook:", error);
+            return NextResponse.json(
+                { 
+                    error: "Failed to subscribe to Instagram webhook",
+                    details: error.response?.data || error.message 
+                },
+                { status: error.response?.status || 500 }
+            );
+        }
     } catch (error) {
         console.error("Error in webhook handler:", error);
         return NextResponse.json(
-            { error: "Internal server error" },
+            { 
+                error: "Internal server error",
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }
