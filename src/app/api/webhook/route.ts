@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   
     if (mode && token && mode === 'subscribe' && token === VERIFY_TOKEN) {
       console.log('Webhook verified');
-      return NextResponse.json({ message: "success", challenge });
+      return NextResponse.json({ challenge });
     }
     return NextResponse.json({ message: "failure" });
 }
