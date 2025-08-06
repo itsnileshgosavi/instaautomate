@@ -45,8 +45,22 @@ export const instagramApi = {
       }
 
       return await response.data;
-    } catch (error) {
-      console.error('Error sending IG message:', error);
+    } catch (error: any) {
+      // Log the most relevant axios error info
+      if (error.response) {
+        console.error(
+          'IG API error:',
+          JSON.stringify({
+            data: error.response.data,
+            status: error.response.status,
+            headers: error.response.headers,
+            config: error.config,
+            request: error.request && typeof error.request === 'object' ? undefined : error.request // avoid circular
+          }, null, 2)
+        );
+      } else {
+        console.error('Error sending IG message:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      }
       throw error;
     }
   },
