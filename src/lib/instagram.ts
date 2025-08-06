@@ -30,6 +30,7 @@ export const instagramApi = {
         {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
           },
           data: JSON.stringify({
             recipient: { id: recipientId },
@@ -60,6 +61,7 @@ export const instagramApi = {
         {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
           },
           data: JSON.stringify({
             message: message,
