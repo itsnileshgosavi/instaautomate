@@ -1,6 +1,7 @@
 import NextAuth, { DefaultSession, JWT } from "next-auth";
 import InstagramProvider from "next-auth/providers/instagram";
 import prisma from "@/lib/prisma";
+import { getLongLIvedToken } from "@/services/getLongLIvedToken";
 
 declare module "next-auth" {
   interface Session {
@@ -37,13 +38,14 @@ const handler = NextAuth({
             instagramId: user.id,
           },
         });
-        if (!dbUser) {
+        if (!dbUser && account.access_token) {
+          const longLivedToken = await getLongLIvedToken(account.access_token);
           await prisma.user.create({
             data: {
               instagramId: user.id,
               name: user.name,
               email: user.email,
-              accessToken: account.access_token,
+              accessToken: longLivedToken,
               refreshToken: account.refresh_token,
             },
           });
