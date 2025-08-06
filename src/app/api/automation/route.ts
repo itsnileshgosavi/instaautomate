@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import authOptions from '../auth/[...nextauth]/authOptions';
+
+// GET: List all automations for the current user
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const automations = await prisma.automationRule.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+  });
+  return NextResponse.json(automations);
+}
+
+// POST: Create a new automation rule
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const body = await req.json();
+  const { instaUserId, triggerType, triggerWord, replyText, isActive } = body;
+  if (!instaUserId || !triggerType || !triggerWord || !replyText) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+  const automation = await prisma.automationRule.create({
+    data: {
+      userId: session.user.id,
+      instaUserId,
+      triggerType,
+      triggerWord,
+      replyText,
+      isActive: isActive !== false,
+    },
+  });
+  return NextResponse.json(automation, { status: 201 });
+}

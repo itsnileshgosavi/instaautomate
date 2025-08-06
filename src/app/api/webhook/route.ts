@@ -63,11 +63,24 @@ async function handleMessageEvent(event: any) {
       return;
     }
 
+    // Find automation rule for this business user, triggerType 'message', and matching triggerWord
+    const automation = await prisma.automationRule.findFirst({
+      where: {
+        instaUserId: recipient.id,
+        triggerType: 'message',
+        isActive: true,
+        triggerWord: { mode: 'insensitive', contains: message.text || '' }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const reply = automation?.replyText || 'Hi! Thanks for your message. Please follow us for more updates!';
+
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
     await instagramApi.sendMessage({
       instaAccountId: businessUser.instagramId,
       recipientId: sender.id,
-      message: 'Hi! Thanks for your message. Please follow us for more updates!',
+      message: reply,
       accessToken: businessUser.accessToken
     });
 
@@ -99,10 +112,23 @@ async function handleCommentEvent(commentData: any, id: string) {
       return;
     }
 
+    // Find automation rule for this business user, triggerType 'comment', and matching triggerWord
+    const automation = await prisma.automationRule.findFirst({
+      where: {
+        instaUserId: id,
+        triggerType: 'comment',
+        isActive: true,
+        triggerWord: { mode: 'insensitive', contains: commentData.text || '' }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const reply = automation?.replyText || 'Thanks for your comment! Please follow us for more updates!';
+
     // Send auto-reply to comment
     await instagramApi.replyToComment({
       commentId,
-      message: 'Thanks for your comment! Please follow us for more updates!',
+      message: reply,
       accessToken: user.accessToken
     });
 
