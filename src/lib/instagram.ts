@@ -26,16 +26,15 @@ export const instagramApi = {
     try {
       // Instagram Graph API for messaging: senderIgUserId is your business IG user ID
       const response = await axios.post(
-        `https://graph.instagram.com/v23.0/${instaAccountId}/messages?access_token=${accessToken}`,
+        `https://graph.instagram.com/v23.0/${instaAccountId}/messages`,
+        null,
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          data: JSON.stringify({
-            recipient: { id: recipientId },
-            message: { text: message }
-          })
+          params: {
+            domain: 'INSTAGRAM',
+            message: JSON.stringify({ text: message }),
+            recipient: JSON.stringify({ id: recipientId }),
+            access_token: accessToken
+          }
         }
       );
 
