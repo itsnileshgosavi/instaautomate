@@ -9,7 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const automation = await prisma.automationRule.findUnique({
-    where: { id, userId: session.user.id },
+    where: { id },
   });
   if (!automation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(automation);
@@ -22,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const automation = await prisma.automationRule.update({
-    where: { id, userId: session.user.id },
+    where: { id },
     data: body,
   });
   return NextResponse.json(automation);
@@ -34,7 +34,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   await prisma.automationRule.delete({
-    where: { id, userId: session.user.id },
+    where: { id },
   });
   return NextResponse.json({ success: true });
 }

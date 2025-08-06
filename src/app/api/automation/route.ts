@@ -19,14 +19,20 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
-  const { instaUserId, triggerType, triggerWord, replyText, isActive } = body;
-  if (!instaUserId || !triggerType || !triggerWord || !replyText) {
+  const { triggerType, triggerWord, replyText, isActive } = body;
+  if ( !triggerType || !triggerWord || !replyText) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+  const user = await prisma.user.findUnique({
+    where: { instagramId: session.user.instagramId },
+    select: { instaUserId: true, id:true },
+  });
+  if (!user?.instaUserId) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  
   const automation = await prisma.automationRule.create({
     data: {
-      userId: session.user.id,
-      instaUserId,
+      userId: user.id,
+      instaUserId: user.instaUserId,
       triggerType,
       triggerWord,
       replyText,
