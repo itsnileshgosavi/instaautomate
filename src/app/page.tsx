@@ -3,9 +3,12 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useSubscribeMutation } from "@/lib/rtk/subscribe";
 
 export default function Home() {
   const session = useSession();
+
+  const [subscribe] = useSubscribeMutation();
 
   console.log(session);
   
@@ -17,6 +20,7 @@ export default function Home() {
         <h2>You are signed in as {session?.data?.user?.name}</h2>
       </div>
       <Button onClick={() => signOut()}>Sign out</Button>
+      <Button onClick={() => subscribe()}>Subscribe</Button>
        
     </div>
   );
