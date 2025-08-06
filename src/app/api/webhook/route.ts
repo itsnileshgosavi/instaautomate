@@ -82,15 +82,17 @@ async function handleCommentEvent(commentData: any, id: string) {
   try {
     const { from, id: commentId } = commentData;
     
-    // Skip if comment is from the page itself
-    if (from.id === commentData.media?.owner?.id) return;
+    
     
     // Get the page access token from database
     // Note: You'll need to store the page access token for your Instagram account
     const user = await prisma.user.findFirst({
       where: { instaUserId: id },
-      select: { accessToken: true }
+      select: { accessToken: true, instaUserId: true }
     });
+
+    // Skip if comment is from the page itself
+    if (from.id === user?.instaUserId) return;
 
     if (!user?.accessToken) {
       console.error('No access token found for comment from:', from.id);
