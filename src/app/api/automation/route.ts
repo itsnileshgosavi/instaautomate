@@ -6,9 +6,9 @@ import authOptions from '../auth/[...nextauth]/authOptions';
 // GET: List all automations for the current user
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session?.user?.instagramId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const automations = await prisma.automationRule.findMany({
-    where: { userId: session.user.id },
+    where: { instaUserId: session.user.instagramId },
     orderBy: { createdAt: 'desc' },
   });
   return NextResponse.json(automations);
