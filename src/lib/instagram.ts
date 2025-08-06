@@ -70,7 +70,7 @@ export const instagramApi = {
   async replyToComment({ commentId, message, accessToken }: SendCommentOptions) {
     try {
       const response = await axios.post(
-        `https://graph.instagram.com/v23.0/${commentId}/replies?access_token=${accessToken}`,
+        `https://graph.instagram.com/v23.0/${commentId}/replies`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -79,6 +79,12 @@ export const instagramApi = {
           data: JSON.stringify({
             message: message,
           })
+        },
+        {
+          params: {
+            access_token: accessToken,
+            message: message
+          }
         }
       );
 
