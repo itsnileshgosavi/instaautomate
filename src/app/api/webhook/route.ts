@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log('Received webhook event:', JSON.stringify(data, null, 2));
+    const id = data.entry[0].id;
 
     // Handle different types of webhook events
     if (data.object === 'instagram') {
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
         if (entry.changes) {
           for (const change of entry.changes) {
             if (change.field === 'comments') {
-              await handleCommentEvent(change.value);
+              await handleCommentEvent(change.value, id);
             }
           }
         }
@@ -77,7 +78,7 @@ async function handleMessageEvent(event: any) {
 }
 
 // Handle Instagram comment events
-async function handleCommentEvent(commentData: any) {
+async function handleCommentEvent(commentData: any, id: string) {
   try {
     const { from, id: commentId } = commentData;
     
@@ -87,7 +88,7 @@ async function handleCommentEvent(commentData: any) {
     // Get the page access token from database
     // Note: You'll need to store the page access token for your Instagram account
     const user = await prisma.user.findFirst({
-      where: { instaUserId: from.id },
+      where: { instaUserId: id },
       select: { accessToken: true }
     });
 
