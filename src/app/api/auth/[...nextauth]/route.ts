@@ -7,6 +7,7 @@ declare module "next-auth" {
     refreshToken?: string;
     user: {
       id: string;
+      instagramId: string;
     } & DefaultSession["user"];
   }
   interface JWT {

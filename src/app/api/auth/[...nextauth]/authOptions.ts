@@ -42,11 +42,12 @@ const authOptions: AuthOptions = {
         }
         return false;
       },
-      async jwt({ token, account }) {
+      async jwt({ token, account, user }) {
         if (account) {
           token.accessToken = account.access_token;
           token.refreshToken = account.refresh_token;
           token.id = account.providerAccountId;
+          token.instagramId = user.id;
         }
         return token;
       },
@@ -55,7 +56,8 @@ const authOptions: AuthOptions = {
         session.refreshToken = token.refreshToken as string;
         if (session.user) {
           session.user.id = token.id as string;
-        }
+          session.user.instagramId = token.instagramId as string;
+          }
         return session;
       },
     },

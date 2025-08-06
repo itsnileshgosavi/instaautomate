@@ -7,9 +7,9 @@ export async function POST(req: NextRequest) {
     try {
         const session = await getServerAuthSession();
         
-        if (!session) {
+        if (!session?.user?.instagramId) {
             return NextResponse.json(
-                { error: "Not authenticated" },
+                { error: "User insta id not found" },
                 { status: 401 }
             );
         }
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         // You can access the user's access token like this:
         const user = await prisma.user.findUnique({
             where: {
-                instagramId: session?.user?.id,
+                instagramId: session?.user?.instagramId,
             },
         });
         if (!user) {
