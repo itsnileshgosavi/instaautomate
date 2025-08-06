@@ -2,7 +2,7 @@ import axios from "axios";
 import prisma from "./prisma";
 
 interface SendMessageOptions {
-  senderIgUserId: string; // IG business user ID (your account)
+  instaAccountId: string; // IG business user ID (your account)
   recipientId: string;    // IG user ID of the recipient
   message: string;
   accessToken: string;
@@ -22,11 +22,11 @@ export const instagramApi = {
    * Send a direct message to a user using the Instagram Graph API
    * See: https://developers.facebook.com/docs/instagram-api/guides/messaging
    */
-  async sendMessage({ senderIgUserId, recipientId, message, accessToken }: SendMessageOptions) {
+  async sendMessage({ instaAccountId, recipientId, message, accessToken }: SendMessageOptions) {
     try {
       // Instagram Graph API for messaging: senderIgUserId is your business IG user ID
       const response = await axios.post(
-        `https://graph.instagram.com/v23.0/${senderIgUserId}/messages?access_token=${accessToken}`,
+        `https://graph.instagram.com/v23.0/${instaAccountId}/messages?access_token=${accessToken}`,
         {
           headers: {
             'Content-Type': 'application/json',

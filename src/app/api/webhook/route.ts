@@ -55,7 +55,7 @@ async function handleMessageEvent(event: any) {
     // Get your IG business user from DB using recipient.id
     const businessUser = await prisma.user.findFirst({
       where: { instaUserId: recipient.id },
-      select: { instaUserId: true, accessToken: true }
+      select: { instaUserId: true, accessToken: true, instagramId:true }
     });
 
     if (!businessUser?.accessToken || !businessUser?.instaUserId) {
@@ -65,7 +65,7 @@ async function handleMessageEvent(event: any) {
 
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
     await instagramApi.sendMessage({
-      senderIgUserId: businessUser.instaUserId,
+      instaAccountId: businessUser.instagramId,
       recipientId: sender.id,
       message: 'Hi! Thanks for your message. Please follow us for more updates!',
       accessToken: businessUser.accessToken
