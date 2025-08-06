@@ -29,11 +29,11 @@ const authOptions: AuthOptions = {
           });
           if (!dbUser && account.access_token) {
             const longLivedToken = await getLongLIvedToken(account.access_token);
-            const {instaUserId, username} = await getInstagramBusinessAccount(account.access_token);
+            const {instaUserId, username, name} = await getInstagramBusinessAccount(account.access_token);
             await prisma.user.create({
               data: {
                 instagramId: user.id,
-                name: user.name,
+                name: name,
                 email: user.email,
                 accessToken: longLivedToken,
                 refreshToken: account.refresh_token,
