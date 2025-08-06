@@ -332,12 +332,12 @@ export default function Home() {
                     {automations?.length === 1 ? "rule" : "rules"} configured
                   </p>
                 </div>
-                {/* <div className="flex items-center space-x-2 text-sm text-slate-600">
+                <div className="flex items-center space-x-2 text-sm text-slate-600">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>
                     {automations?.filter((rule) => rule.isActive).length} active
                   </span>
-                </div> */}
+                </div>
               </div>
             </div>
 

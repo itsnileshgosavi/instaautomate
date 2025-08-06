@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorised" });
   }
 
-  return NextResponse.json({ automations: dbuser.automationRules });
+  return NextResponse.json(dbuser.automationRules);
 }
 
 // POST: Create a new automation rule
