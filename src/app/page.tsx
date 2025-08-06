@@ -102,7 +102,7 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600">Loading automation rules...</p>
@@ -332,12 +332,12 @@ export default function Home() {
                     {automations?.length === 1 ? "rule" : "rules"} configured
                   </p>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-slate-600">
+                {/* <div className="flex items-center space-x-2 text-sm text-slate-600">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>
                     {automations?.filter((rule) => rule.isActive).length} active
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
 
