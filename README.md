@@ -23,17 +23,21 @@ npm install
 ```env
 DATABASE_URL="postgres://username:password@host:port/database"
 NEXTAUTH_SECRET='SECRET' //use base64 secret string
-INSTAGRAM_CLIENT_ID=''  //get this from meta developers portal
-INSTAGRAM_CLIENT_SECRET='' //get this from meta developers portal
-NEXT_PUBLIC_APP_URL='http://localhost:3000' //your app url
+INSTAGRAM_CLIENT_ID=''  //get this from meta developers portal (https://www.youtube.com/watch?v=IBs-yJOhTto)
+INSTAGRAM_CLIENT_SECRET='' //get this from meta developers portal (https://www.youtube.com/watch?v=IBs-yJOhTto)
+NEXT_PUBLIC_BASE_URL='http://localhost:3000' //your app url
 ```
 
-3. Add callback URL in meta developers portal - https://yourappurl/api/auth/callback/instagram
+3. Add callback URL in meta developers portal - https://yourappurl/api/auth/callback/instagram  //THis must be https url http is not supported
 
-4. Run the application
+4. Add a webhook in meta developers portal - https://yourappurl/api/webhook //This must be https url http is not supported
+
+5. Run the application
 ```bash
 npm run dev
 ```
+
+6. Login with instagram account and add automation rules ps - for production you will have to get advanced access which can be only requested after business verification. For developer or self use you can add your instagram account as a test/developer account in meta business manager portal and use it with no verification required.
 
 ## License
 
