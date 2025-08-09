@@ -21,12 +21,11 @@ export async function generateAiResponse(
       const genAI = new GoogleGenerativeAI(geminiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
       const generation = await model.generateContent({
-        contents: [
-          { role: "system", parts: [{ text: persona }] },
-          { role: "user", parts: [{ text: userMessage }] },
-        ],
+        systemInstruction: { role: "system", parts: [{ text: persona }] },
+        contents: [{ role: "user", parts: [{ text: userMessage }] }],
       });
-      const text = generation.response.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      const text = generation.response.text();
       if (text) return text.trim();
     } catch (err) {
       console.error("Gemini SDK call failed", err);
