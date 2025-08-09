@@ -31,7 +31,27 @@ export const instagramApi = {
         {
           params: {
             domain: 'INSTAGRAM',
-            message: JSON.stringify({ text: message }),
+            // Craft a generic template with a call-to-action button
+            message: JSON.stringify({
+              attachment: {
+                type: "template",
+                payload: {
+                  template_type: "generic",
+                  elements: [
+                    {
+                      title: message,
+                      buttons: [
+                        {
+                          type: "web_url",
+                          url: "https://craftmymenu.com",
+                          title: "click for more",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            }),
             recipient: JSON.stringify({ id: recipientId }),
             access_token: accessToken
           }
