@@ -51,9 +51,9 @@ MIT
 
 If you find this project helpful, you can support me on **Buy&nbsp;Me&nbsp;a&nbsp;Coffee** ☕
 
-```html
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="nileshgosavi" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-```
+<a href="https://www.buymeacoffee.com/nileshgosavi" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" />
+</a>
 
 ### Future Improvements
 
