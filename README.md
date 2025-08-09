@@ -34,7 +34,7 @@ AI_ASSISTANT_PERSONA="You are the personal assistant of XYZ creator/business." /
 
 3. Add callback URL in meta developers portal - https://yourappurl/api/auth/callback/instagram  //THis must be https url http is not supported
 
-4. Add a webhook in meta developers portal - https://yourappurl/api/webhook //This must be https url http is not supported. Webhook won't work on localhost.
+4. Add a webhook in meta developers portal - https://yourappurl/api/webhook and enable messages and comments webhook fields. //This must be https url http is not supported. Webhook won't work on localhost.
 
 5. Run the application
 ```bash
