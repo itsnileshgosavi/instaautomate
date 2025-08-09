@@ -6,6 +6,7 @@ This is a web application that allows users to automate their Instagram accounts
 
 - Automatic replies to messages and comments
 - User-configurable trigger words and responses
+- AI-powered automatic replies using Google Gemini (with OpenAI fallback)
 - Real-time updates to the UI
 - Support for both messages and comments
 
@@ -26,6 +27,9 @@ NEXTAUTH_SECRET='SECRET' //use base64 secret string
 INSTAGRAM_CLIENT_ID=''  //get this from meta developers portal (https://www.youtube.com/watch?v=IBs-yJOhTto)
 INSTAGRAM_CLIENT_SECRET='' //get this from meta developers portal (https://www.youtube.com/watch?v=IBs-yJOhTto)
 NEXT_PUBLIC_BASE_URL='http://localhost:3000' //your app url
+GOOGLE_GEMINI_API_KEY='your_gemini_key' //optional, preferred
+OPENAI_API_KEY='your_openai_key' //fallback if no Gemini key
+AI_ASSISTANT_PERSONA="You are the personal assistant of XYZ creator/business." //optional custom persona
 ```
 
 3. Add callback URL in meta developers portal - https://yourappurl/api/auth/callback/instagram  //THis must be https url http is not supported

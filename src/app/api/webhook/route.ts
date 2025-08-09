@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { instagramApi } from "@/lib/instagram";
+import { generateAiResponse } from "@/lib/ai";
 
 
 
@@ -74,7 +75,10 @@ async function handleMessageEvent(event: any) {
       orderBy: { createdAt: 'desc' }
     });
 
-    const reply = automation?.replyText || 'Hi! Thanks for your message. Please follow us for more updates!';
+    const reply = automation?.replyText || await generateAiResponse(
+      message.text || "",
+      process.env.AI_ASSISTANT_PERSONA
+    );
 
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
     await instagramApi.sendMessage({
