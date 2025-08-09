@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
 /**
  * Generate an AI-powered reply using Google Gemini API with OpenAI fallback.
  * @param userMessage The incoming user message or comment text.
@@ -10,35 +11,25 @@ export async function generateAiResponse(
   const persona = context?.trim() ||
     "You are a helpful Instagram assistant for a business account. Keep responses short, friendly and on-brand.";
 
-  // Try Google Gemini first -----------------------------------------------
+  // Try Google Gemini first via SDK ---------------------------------------
   const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
   if (geminiKey) {
     try {
-      const geminiEndpoint =
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiKey}`;
-
-      const geminiBody = {
+      // Defer import so build succeeds if dependency not installed yet
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const generation = await model.generateContent({
         contents: [
           { role: "system", parts: [{ text: persona }] },
           { role: "user", parts: [{ text: userMessage }] },
         ],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 100 },
-      };
-
-      const geminiRes = await fetch(geminiEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(geminiBody),
       });
-      if (geminiRes.ok) {
-        const geminiJson: any = await geminiRes.json();
-        const candidate = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (candidate) return candidate.trim();
-      } else {
-        console.error("Gemini API error", await geminiRes.text());
-      }
+      const text = generation.response.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text.trim();
     } catch (err) {
-      console.error("Gemini request failed", err);
+      console.error("Gemini SDK call failed", err);
     }
   }
 
