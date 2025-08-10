@@ -116,23 +116,50 @@ async function handleCommentEvent(commentData: any, id: string) {
       return;
     }
 
-    // Find automation rule for this business user, triggerType 'comment', and matching triggerWord
+    // Find automation rule for this business user, triggerType 'comment', postId match, and matching triggerWord
     const automation = await prisma.automationRule.findFirst({
       where: {
         instaUserId: id,
         triggerType: 'comment',
+        postId: commentData.media?.id || commentData.media_id || '',
         isActive: true,
         triggerWord: { mode: 'insensitive', contains: commentData.text || '' }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    const reply = automation?.replyText || 'Thanks for your comment! Please follow us for more updates!';
+    if (!automation) {
+      // fallback: check for rule without specific postId (global comment rule)
+      const globalRule = await prisma.automationRule.findFirst({
+        where: {
+          instaUserId: id,
+          triggerType: 'comment',
+          postId: null, // null treated as global
+          isActive: true,
+          triggerWord: { mode: 'insensitive', contains: commentData.text || '' }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
 
-    // Send auto-reply to comment
-    await instagramApi.replyToComment({
+      if (!globalRule) return;
+
+      // Send public comment reply for global rule
+      await instagramApi.replyToComment({
+        commentId,
+        message: globalRule.replyText,
+        accessToken: user.accessToken
+      });
+      return;
+    }
+
+    const { replyText, linkText, linkUrl } = automation;
+
+    // Send private reply (DM) to commentor
+    await instagramApi.sendPrivateReply({
       commentId,
-      message: reply,
+      message: replyText,
+      linkText: linkText || undefined,
+      linkUrl: linkUrl || undefined,
       accessToken: user.accessToken
     });
 

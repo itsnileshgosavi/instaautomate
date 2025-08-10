@@ -37,6 +37,9 @@ model AutomationRule {
   triggerType  String   // 'message' | 'comment'
   triggerWord  String   // word or phrase to match
   replyText    String   // reply to send
+  linkText     String?  // anchor text for generic template
+  linkUrl      String?  // URL for generic template button
+  postId       String?   // Instagram post ID to monitor
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

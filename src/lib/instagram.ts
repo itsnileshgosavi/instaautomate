@@ -85,6 +85,55 @@ export const instagramApi = {
   },
 
   /**
+   * Send a private reply to a commentor (DM)
+   * https://developers.facebook.com/docs/instagram-platform/private-replies
+   */
+  async sendPrivateReply({ commentId, message, linkText, linkUrl, accessToken }: { commentId: string; message: string; linkText?: string; linkUrl?: string; accessToken: string }) {
+    try {
+      // Build payload: either text or generic template
+      let payload: any = { message };
+      if (linkText && linkUrl) {
+        payload = {
+          attachment: {
+            type: "template",
+            payload: {
+              template_type: "generic",
+              elements: [
+                {
+                  title: message,
+                  buttons: [
+                    {
+                      type: "web_url",
+                      url: linkUrl,
+                      title: linkText,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+      }
+
+      const response = await axios.post(
+        `https://graph.instagram.com/v23.0/${commentId}/private_replies`,
+        {
+          message: JSON.stringify(payload),
+          access_token: accessToken,
+        }
+      );
+
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(`Private reply failed: ${JSON.stringify(response.data)}`);
+      }
+      return response.data;
+    } catch (error: any) {
+      console.error('Error sending private reply:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
    * Reply to a comment
    */
   async replyToComment({ commentId, message, accessToken }: SendCommentOptions) {
