@@ -4,8 +4,11 @@ import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useSubscribeMutation } from "@/lib/rtk/subscribe";
+import { toast } from "sonner";
+import AutomationRuleForm from "@/components/AutomationRuleForm";
 
 import {
+  useGetPostsQuery,
   useGetAutomationsQuery,
   useCreateAutomationMutation,
   useUpdateAutomationMutation,
@@ -41,12 +44,23 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { z } from "zod";
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
 export default function Home() {
   const session = useSession();
 
   const [subscribe] = useSubscribeMutation();
 
   // RTK Query hooks
+  const { data: posts = [] } = useGetPostsQuery();
+
   const {
     data: automations = [],
     isLoading,
@@ -69,19 +83,30 @@ export default function Home() {
       triggerWord: "",
       replyText: "",
       isActive: true,
+      postId: null,
+      linkText: "",
+      linkUrl: "",
     },
     mode: "onChange",
   });
 
   const onSubmit = async (values: AutomationRuleInput) => {
+    // convert empty strings to undefined to satisfy Zod/schema and backend
+    const payload = {
+      ...values,
+      linkText: values.linkText?.trim() ? values.linkText : undefined,
+      linkUrl: values.linkUrl?.trim() ? values.linkUrl : undefined,
+    } as AutomationRuleInput;
     if (editing) {
-      await updateAutomation({ id: editing.id, data: values });
+      await updateAutomation({ id: editing.id, data: payload });
       setEditing(null);
     } else {
-      await createAutomation(values);
+      toast.loading("Creating automation rule...");
+      await createAutomation(payload);
     }
     form.reset();
     refetch();
+    toast.success("Automation rule saved successfully");
   };
 
   const handleEdit = (rule: AutomationRule) => {
@@ -91,6 +116,9 @@ export default function Home() {
       triggerWord: rule.triggerWord,
       replyText: rule.replyText,
       isActive: rule.isActive,
+      postId: rule.postId ?? null,
+      linkText: rule.linkText ?? "",
+      linkUrl: rule.linkUrl ?? "",
     });
   };
 
@@ -172,149 +200,15 @@ export default function Home() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                <FormProvider {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
-                  >
-                    <div className="space-y-5">
-                      <FormField<AutomationRuleInput>
-                        control={form.control}
-                        name="triggerType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium text-slate-700">
-                              Trigger Type
-                            </FormLabel>
-                            <FormControl>
-                              <Select
-                                id="triggerType"
-                                value={(field.value as string) ?? "message"}
-                                onChange={(e) => field.onChange(e.target.value)}
-                                className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                              >
-                                <option value="message">📱 Message</option>
-                                <option value="comment">💬 Comment</option>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField<AutomationRuleInput>
-                        control={form.control}
-                        name="triggerWord"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium text-slate-700">
-                              Trigger Word
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                id="triggerWord"
-                                placeholder="e.g., hello, help, info"
-                                className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                                {...field}
-                                value={field.value as string}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField<AutomationRuleInput>
-                        control={form.control}
-                        name="replyText"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium text-slate-700">
-                              Reply Message
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                id="replyText"
-                                placeholder="Your automated response"
-                                className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                                {...field}
-                                value={(field.value as string) || ""}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField<AutomationRuleInput>
-                        control={form.control}
-                        name="isActive"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-                              <div className="flex flex-col">
-                                <FormLabel className="text-sm font-medium text-slate-700">
-                                  Rule Status
-                                </FormLabel>
-                                <p className="text-xs text-slate-500 mt-1">
-                                  {field.value
-                                    ? "Rule is active and will trigger"
-                                    : "Rule is paused"}
-                                </p>
-                              </div>
-                              <FormControl>
-                                <Switch
-                                  id="isActive"
-                                  checked={
-                                    typeof field.value === "boolean"
-                                      ? field.value
-                                      : false
-                                  }
-                                  onChange={(e) =>
-                                    field.onChange(e.target.checked)
-                                  }
-                                  name={field.name}
-                                  onBlur={field.onBlur}
-                                  ref={field.ref}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
-                      <Button
-                        type="submit"
-                        disabled={isCreating || isUpdating}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                      >
-                        {editing
-                          ? isUpdating
-                            ? "Updating..."
-                            : "Update Rule"
-                          : isCreating
-                          ? "Creating..."
-                          : "Create Rule"}
-                      </Button>
-                      {editing && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setEditing(null);
-                            form.reset();
-                          }}
-                          className="border-slate-300 hover:bg-slate-50"
-                        >
-                          Cancel
-                        </Button>
-                      )}
-                    </div>
-                  </form>
-                </FormProvider>
+                <AutomationRuleForm
+                  form={form}
+                  posts={posts}
+                  isSubmitting={isCreating || isUpdating}
+                  editing={false}
+                  onCancel={() => setEditing(null)}
+                  onSubmit={onSubmit}
+                  submitLabel="Create Rule"
+                />
               </CardContent>
             </Card>
           </div>
@@ -379,11 +273,17 @@ export default function Home() {
                             className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                               rule.triggerType === "message"
                                 ? "bg-blue-100 text-blue-600"
-                                : "bg-purple-100 text-purple-600"
+                                : rule.triggerType === "comment"
+                                ? "bg-purple-100 text-purple-600"
+                                : "bg-teal-100 text-teal-600"
                             }`}
                           >
                             <span className="text-lg">
-                              {rule.triggerType === "message" ? "📱" : "💬"}
+                              {rule.triggerType === "message"
+                                ? "📱"
+                                : rule.triggerType === "comment"
+                                ? "💬"
+                                : "🔒"}
                             </span>
                           </div>
                           <div className="flex-1">
@@ -391,7 +291,9 @@ export default function Home() {
                               <CardTitle className="text-lg font-semibold text-slate-800">
                                 {rule.triggerType === "message"
                                   ? "Message"
-                                  : "Comment"}{" "}
+                                  : rule.triggerType === "comment"
+                                  ? "Comment"
+                                  : "Private Reply"}{" "}
                                 Automation
                               </CardTitle>
                               <div
@@ -410,6 +312,15 @@ export default function Home() {
                                 "{rule.triggerWord}"
                               </span>
                             </p>
+                            {rule.postId ? (
+                              <p className="text-xs mt-1 text-blue-600 font-medium">
+                                📸 Post ID: {rule.postId}
+                              </p>
+                            ) : (
+                              <p className="text-xs mt-1 text-slate-500">
+                                🌐 Global (all posts)
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -440,7 +351,12 @@ export default function Home() {
                             Reply:
                           </span>
                           <p className="text-slate-800 text-sm flex-1 leading-relaxed">
-                            "{rule.replyText}"
+                            "{rule.replyText}"{" "}
+                            {rule.linkText && rule.linkUrl && (
+                              <span className="ml-2 text-blue-600 underline">
+                                [{rule.linkText}]
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -452,6 +368,33 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <Sheet
+        defaultOpen={editing !== null}
+        modal={true}
+        open={editing !== null}
+        onOpenChange={(open) => setEditing(open ? null : editing)}
+      >
+        <SheetContent side="left" className="w-full sm:max-w-[50vw]">
+          <SheetHeader>
+            <SheetTitle>{editing ? "Edit Rule" : "Create Rule"}</SheetTitle>
+            <SheetDescription>
+              {editing
+                ? "Edit an existing automation rule"
+                : "Create a new automation rule"}
+            </SheetDescription>
+          </SheetHeader>
+
+          <AutomationRuleForm
+            form={form}
+            posts={posts}
+            isSubmitting={isUpdating}
+            editing={editing !== null}
+            onCancel={() => setEditing(null)}
+            onSubmit={onSubmit}
+            submitLabel={"Save Rule"}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

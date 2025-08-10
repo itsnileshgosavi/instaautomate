@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
-  const { triggerType, triggerWord, replyText, isActive } = body;
+  const { triggerType, triggerWord, replyText, linkText, linkUrl, postId, isActive } = body;
   if (!triggerType || !triggerWord || !replyText) {
     return NextResponse.json(
       { error: "Missing required fields" },
@@ -50,6 +50,9 @@ export async function POST(req: NextRequest) {
       triggerType,
       triggerWord,
       replyText,
+      linkText,
+      linkUrl,
+      postId: postId || null,
       isActive: isActive !== false,
     },
   });

@@ -5,9 +5,12 @@ export interface AutomationRule {
   id: string;
   userId: string;
   instaUserId: string;
-  triggerType: 'message' | 'comment';
+  triggerType: 'message' | 'comment' | 'pvtreply';
   triggerWord: string;
   replyText: string;
+  postId?: string | null;
+  linkText?: string | null;
+  linkUrl?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -16,11 +19,17 @@ export interface AutomationRule {
 export const apiSlice = createApi({
   reducerPath: 'api',
   refetchOnFocus: true,
-  tagTypes: ["Instagram", "Automation"],
+  tagTypes: ["Instagram", "Automation", "Posts"],
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/`,
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/`
+      : "/api/",
   }),
   endpoints: (builder) => ({
+    getPosts: builder.query<any[], void>({
+      query: () => ({ url: 'instagram/posts', method: 'GET' }),
+      providesTags: ['Posts'],
+    }),
     getAutomations: builder.query<AutomationRule[], void>({
       query: () => ({ url: 'automation', method: 'GET' }),
       providesTags: ['Automation'],
@@ -41,6 +50,7 @@ export const apiSlice = createApi({
 });
 
 export const {
+  useGetPostsQuery,
   useGetAutomationsQuery,
   useCreateAutomationMutation,
   useUpdateAutomationMutation,

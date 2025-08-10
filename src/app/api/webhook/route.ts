@@ -120,7 +120,7 @@ async function handleCommentEvent(commentData: any, id: string) {
     const automation = await prisma.automationRule.findFirst({
       where: {
         instaUserId: id,
-        triggerType: 'comment',
+        triggerType: 'pvtreply',
         postId: commentData.media?.id || commentData.media_id || '',
         isActive: true,
         triggerWord: { mode: 'insensitive', contains: commentData.text || '' }
@@ -133,7 +133,7 @@ async function handleCommentEvent(commentData: any, id: string) {
       const globalRule = await prisma.automationRule.findFirst({
         where: {
           instaUserId: id,
-          triggerType: 'comment',
+          triggerType: 'pvtreply',
           postId: null, // null treated as global
           isActive: true,
           triggerWord: { mode: 'insensitive', contains: commentData.text || '' }
