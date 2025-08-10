@@ -88,12 +88,12 @@ export const instagramApi = {
    * Send a private reply to a commentor (DM)
    * https://developers.facebook.com/docs/instagram-platform/private-replies
    */
-  async sendPrivateReply({ commentId, message, linkText, linkUrl, accessToken }: { commentId: string; message: string; linkText?: string; linkUrl?: string; accessToken: string }) {
+  async sendPrivateReply({ instaAccountId, commentId, message, linkText, linkUrl, accessToken }: { instaAccountId: string; commentId: string; message: string; linkText?: string; linkUrl?: string; accessToken: string }) {
     try {
-      // Build payload: either text or generic template
-      let payload: any = { message };
+      // Build message payload
+      let messagePayload: any = { text: message };
       if (linkText && linkUrl) {
-        payload = {
+        messagePayload = {
           attachment: {
             type: "template",
             payload: {
@@ -116,10 +116,16 @@ export const instagramApi = {
       }
 
       const response = await axios.post(
-        `https://graph.instagram.com/v23.0/${commentId}/private_replies`,
+        `https://graph.instagram.com/v23.0/${instaAccountId}/messages`,
         {
-          message: JSON.stringify(payload),
-          access_token: accessToken,
+          recipient: { comment_id: commentId },
+          message: messagePayload,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 

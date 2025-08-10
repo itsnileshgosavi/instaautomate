@@ -106,7 +106,7 @@ async function handleCommentEvent(commentData: any, id: string) {
     // Note: You'll need to store the page access token for your Instagram account
     const user = await prisma.user.findFirst({
       where: { instaUserId: id },
-      select: { accessToken: true, instaUserId: true },
+      select: { accessToken: true, instaUserId: true, instagramId: true },
     });
 
     // Skip if comment is from the page itself
@@ -155,6 +155,7 @@ async function handleCommentEvent(commentData: any, id: string) {
       }
       if (globalRule.triggerType === "pvtreply") {
         await instagramApi.sendPrivateReply({
+          instaAccountId: user.instagramId,
           commentId: commentData.id,
           message: globalRule.replyText,
           accessToken: user.accessToken,
@@ -170,6 +171,7 @@ async function handleCommentEvent(commentData: any, id: string) {
 
     if (triggerType === "pvtreply") {
       await instagramApi.sendPrivateReply({
+        instaAccountId: user.instagramId,
         commentId,
         message: replyText,
         linkText: linkText || undefined,
