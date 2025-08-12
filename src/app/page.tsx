@@ -374,7 +374,7 @@ export default function Home() {
         open={editing !== null}
         onOpenChange={(open) => setEditing(open ? null : editing)}
       >
-        <SheetContent side="left" className="w-full sm:max-w-[50vw]">
+        <SheetContent side="left" className="w-full sm:max-w-[50vw] overflow-auto">
           <SheetHeader>
             <SheetTitle>{editing ? "Edit Rule" : "Create Rule"}</SheetTitle>
             <SheetDescription>
