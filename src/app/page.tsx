@@ -40,6 +40,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Home() {
   const session = useSession();
@@ -134,12 +135,22 @@ export default function Home() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">IA</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-black to-black rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  <Avatar>
+                    <AvatarImage
+                      src={session?.data?.user?.image || ""}
+                      alt={session?.data?.user?.name || ""}
+                    />
+                    <AvatarFallback>
+                      {session?.data?.user?.name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                </span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Insta-Automate
+                <h1 className="text-2xl font-bold bg-black bg-clip-text text-transparent">
+                  InstaAutomate
                 </h1>
                 <p className="text-sm text-slate-600">
                   Instagram Automation Platform

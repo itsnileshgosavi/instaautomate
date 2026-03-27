@@ -30,6 +30,10 @@ const authOptions: AuthOptions = {
         // update the access token with each new login
         if (dbUser && account.access_token) {
           const longLivedToken = await getLongLIvedToken(account.access_token);
+          const { instaUserId, username, name, profilePictureUrl } =
+            await getInstagramBusinessAccount(
+              account.access_token || longLivedToken,
+            );
           await prisma.user.update({
             where: {
               id: dbUser.id,
@@ -37,13 +41,16 @@ const authOptions: AuthOptions = {
             data: {
               accessToken: longLivedToken,
               refreshToken: account.refresh_token,
+              image: profilePictureUrl,
+              instagramUsername: username,
+              name: name,
             },
           });
         }
         // create new user if not found
         if (!dbUser && account.access_token) {
           const longLivedToken = await getLongLIvedToken(account.access_token);
-          const { instaUserId, username, name } =
+          const { instaUserId, username, name, profilePictureUrl } =
             await getInstagramBusinessAccount(account.access_token);
           await prisma.user.create({
             data: {
@@ -54,6 +61,7 @@ const authOptions: AuthOptions = {
               refreshToken: account.refresh_token,
               instaUserId: instaUserId,
               instagramUsername: username,
+              image: profilePictureUrl,
             },
           });
         }
@@ -71,6 +79,7 @@ const authOptions: AuthOptions = {
           instagramId: user.id,
           name: user.name,
           email: user.email,
+          image: user.image,
           ...token,
         };
       }
@@ -88,6 +97,7 @@ const authOptions: AuthOptions = {
           session.user.instagramId = token.instagramId as string;
           session.user.name = token.name as string;
           session.user.email = token.email as string;
+          session.user.image = token.image as string;
         }
       }
       return session;
