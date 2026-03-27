@@ -20,18 +20,6 @@ import {
   automationRuleInputSchema,
   AutomationRuleInput,
 } from "@/lib/schemas/automationRuleSchema";
-import { FormProvider } from "react-hook-form";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardHeader,
@@ -274,16 +262,16 @@ export default function Home() {
                               rule.triggerType === "message"
                                 ? "bg-blue-100 text-blue-600"
                                 : rule.triggerType === "comment"
-                                ? "bg-purple-100 text-purple-600"
-                                : "bg-teal-100 text-teal-600"
+                                  ? "bg-purple-100 text-purple-600"
+                                  : "bg-teal-100 text-teal-600"
                             }`}
                           >
                             <span className="text-lg">
                               {rule.triggerType === "message"
                                 ? "📱"
                                 : rule.triggerType === "comment"
-                                ? "💬"
-                                : "🔒"}
+                                  ? "💬"
+                                  : "🔒"}
                             </span>
                           </div>
                           <div className="flex-1">
@@ -292,8 +280,8 @@ export default function Home() {
                                 {rule.triggerType === "message"
                                   ? "Message"
                                   : rule.triggerType === "comment"
-                                  ? "Comment"
-                                  : "Private Reply"}{" "}
+                                    ? "Comment"
+                                    : "Private Reply"}{" "}
                                 Automation
                               </CardTitle>
                               <div
@@ -374,7 +362,10 @@ export default function Home() {
         open={editing !== null}
         onOpenChange={(open) => setEditing(open ? null : editing)}
       >
-        <SheetContent side="left" className="w-full sm:max-w-[50vw] overflow-auto">
+        <SheetContent
+          side="left"
+          className="w-full sm:max-w-[50vw] overflow-auto"
+        >
           <SheetHeader>
             <SheetTitle>{editing ? "Edit Rule" : "Create Rule"}</SheetTitle>
             <SheetDescription>
