@@ -11,7 +11,8 @@
     "prisma:generate": "prisma generate",
     "prisma:db:pull": "prisma db pull",
     "prisma:db:push": "prisma db push",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
