@@ -1,11 +1,19 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { Poppins, Nunito, Geist_Mono, Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const poppins = Poppins({
+  subsets: ["latin", "latin-ext", "devanagari"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
+
+const nunito = Nunito({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext", "vietnamese"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900", "1000"],
+  variable: "--font-nunito",
 });
 
 const geistMono = Geist_Mono({
@@ -27,7 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={cn(
+          "antialiased",
+          poppins.variable,
+          nunito.variable,
+          geistMono.variable,
+        )}
       >
         <Providers>{children}</Providers>
         <Toaster />

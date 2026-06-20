@@ -312,10 +312,10 @@ export default function DashboardPage() {
                     ? MessageCircle
                     : LockKeyhole;
                 const title = isMessage
-                  ? "Message Automation (dm to dm)"
+                  ? "Message Automation"
                   : isComment
-                    ? "Comment Automation (comment to comment)"
-                    : "Private Reply (Comment to DM)";
+                    ? "Comment to Comment"
+                    : "Private Reply";
 
                 return (
                   <Card
