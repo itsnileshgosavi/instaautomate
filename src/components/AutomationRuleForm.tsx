@@ -1,20 +1,21 @@
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
-  automationRuleSchema,
-  AutomationRuleInput,
-} from "@/lib/schemas/automationRuleSchema";
-import {
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+import {
+  AutomationRuleInput,
+  automationRuleSchema,
+} from "@/lib/schemas/automationRuleSchema";
 import { FormProvider, UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 
 interface AutomationRuleFormProps {
   form: UseFormReturn<z.infer<typeof automationRuleSchema>>;
@@ -39,27 +40,24 @@ export default function AutomationRuleForm({
     <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 w-full max-w-xl mx-auto my-0"
+        className="mx-auto w-full max-w-xl space-y-5"
       >
-        <div className="space-y-5">
+        <div className="grid gap-5">
           <FormField<AutomationRuleInput>
             control={form.control}
             name="triggerType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700">
-                  Trigger Type
-                </FormLabel>
+                <FormLabel>Trigger Type</FormLabel>
                 <FormControl>
                   <Select
                     id="triggerType"
                     value={(field.value as string) ?? "message"}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    onChange={(event) => field.onChange(event.target.value)}
                   >
-                    <option value="message">📱 Message</option>
-                    <option value="comment">💬 Comment Reply</option>
-                    <option value="pvtreply">🔒 Comment → DM</option>
+                    <option value="message">Message to Message reply</option>
+                    <option value="comment">Comment to Comment reply</option>
+                    <option value="pvtreply">Comment to DM reply</option>
                   </Select>
                 </FormControl>
                 <FormMessage />
@@ -67,37 +65,38 @@ export default function AutomationRuleForm({
             )}
           />
 
-          {/* Post selector conditionally rendered */}
           {form.watch("triggerType") !== "message" && (
             <FormField<AutomationRuleInput>
               control={form.control}
               name="postId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-slate-700">
+                  <FormLabel>
                     Target Post{" "}
-                    <span className="text-xs text-slate-500">(optional)</span>
+                    <span className="text-xs text-muted-foreground">
+                      (optional)
+                    </span>
                   </FormLabel>
                   <FormControl>
                     <Select
                       id="postId"
                       value={(field.value as string) || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
-                      className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                      onChange={(event) =>
+                        field.onChange(event.target.value || null)
+                      }
                     >
-                      <option value="">🌐 Global (all posts)</option>
-                      {posts.map((p: any) => (
-                        <option key={p.id} value={p.id}>
-                          {p.caption?.slice(0, 50) || p.id}
+                      <option value="">Global (all posts)</option>
+                      {posts.map((post: any) => (
+                        <option key={post.id} value={post.id}>
+                          {post.caption?.slice(0, 50) || post.id}
                         </option>
                       ))}
                     </Select>
                   </FormControl>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Selecting a specific post will send a private reply to the
-                    commenter. Choosing "Global" will send a public comment
-                    reply.
-                  </p>
+                  <FormDescription className="text-xs leading-5">
+                    Selecting a specific post sends a private reply to the
+                    commenter. Global sends a public comment reply.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -107,48 +106,71 @@ export default function AutomationRuleForm({
           <FormField<AutomationRuleInput>
             control={form.control}
             name="triggerWord"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700">
-                  Trigger Word
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    id="triggerWord"
-                    placeholder="e.g., hello, help, info, link"
-                    className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                    {...field}
-                    value={field.value as string}
-                  />
-                </FormControl>
-                <p className="text-xs text-slate-500 mt-1">
-                  any comment/message which contains this word will trigger
-                  reply
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const isEmpty = !(field.value as string)?.trim();
+              return (
+                <FormItem>
+                  <div className="flex items-center justify-between gap-2">
+                    <FormLabel>
+                      Trigger Word{" "}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        (optional)
+                      </span>
+                    </FormLabel>
+                    {isEmpty && (
+                      <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                        ⚡ Matches everything
+                      </span>
+                    )}
+                  </div>
+                  <FormControl>
+                    <Input
+                      id="triggerWord"
+                      placeholder="Leave empty to reply to any message or comment"
+                      {...field}
+                      value={(field.value as string) ?? ""}
+                    />
+                  </FormControl>
+                  <FormDescription className="text-xs leading-5">
+                    {isEmpty ? (
+                      <span className="font-medium text-amber-600 dark:text-amber-400">
+                        No trigger word set — this rule will fire on{" "}
+                        <strong>every</strong>{" "}
+                        {form.watch("triggerType") === "message"
+                          ? "incoming DM"
+                          : "comment"}
+                        .
+                      </span>
+                    ) : (
+                      <>
+                        Only fires when a message or comment{" "}
+                        <strong>contains</strong> this word (case-insensitive).
+                      </>
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
+
           <FormField<AutomationRuleInput>
             control={form.control}
             name="replyText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700">
-                  Reply Text
-                </FormLabel>
+                <FormLabel>Reply Text</FormLabel>
                 <FormControl>
                   <Input
                     id="replyText"
-                    placeholder="eg- Thanks for comment"
-                    className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="e.g., Thanks for your comment"
                     {...field}
                     value={(field.value as string) || ""}
                   />
                 </FormControl>
-                <p className="text-xs text-slate-500 mt-1">
-                  Text to send as reply
-                </p>
+                <FormDescription className="text-xs leading-5">
+                  Text to send as the automatic reply.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -161,45 +183,40 @@ export default function AutomationRuleForm({
                 name="linkText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-700">
-                      Link Text / Anchor Text
-                    </FormLabel>
+                    <FormLabel>Link Text</FormLabel>
                     <FormControl>
                       <Input
                         id="linkText"
-                        placeholder="eg- Get Started, Learn More, Click Here"
-                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="e.g., Get Started, Learn More"
                         {...field}
                         value={(field.value as string) || ""}
                       />
                     </FormControl>
-                    <p className="text-xs text-slate-500 mt-1">
-                      This is required if you want to add a link to the reply
-                    </p>
+                    <FormDescription className="text-xs leading-5">
+                      Required only when adding a link to the reply.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField<AutomationRuleInput>
                 control={form.control}
                 name="linkUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-700">
-                      Link URL
-                    </FormLabel>
+                    <FormLabel>Link URL</FormLabel>
                     <FormControl>
                       <Input
                         id="linkUrl"
-                        placeholder="eg- https://example.com"
-                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="e.g., https://example.com"
                         {...field}
                         value={(field.value as string) || ""}
                       />
                     </FormControl>
-                    <p className="text-xs text-slate-500 mt-1">
-                      This is required if you want to add a link to the reply
-                    </p>
+                    <FormDescription className="text-xs leading-5">
+                      Required only when adding a link to the reply.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -212,12 +229,10 @@ export default function AutomationRuleForm({
             name="isActive"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/40 p-4">
                   <div className="flex flex-col">
-                    <FormLabel className="text-sm font-medium text-slate-700">
-                      Rule Status
-                    </FormLabel>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <FormLabel>Rule Status</FormLabel>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
                       {field.value
                         ? "Rule is active and will trigger"
                         : "Rule is paused"}
@@ -227,7 +242,7 @@ export default function AutomationRuleForm({
                     <Switch
                       id="isActive"
                       checked={!!field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
+                      onChange={(event) => field.onChange(event.target.checked)}
                       name={field.name}
                       onBlur={field.onBlur}
                       ref={field.ref}
@@ -240,27 +255,23 @@ export default function AutomationRuleForm({
           />
         </div>
 
-        <div className="flex gap-3 pt-4">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
+        <div className="grid gap-3 pt-2 sm:grid-cols-[1fr_auto]">
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             {submitLabel ||
               (editing
                 ? isSubmitting
                   ? "Updating..."
                   : "Update Rule"
                 : isSubmitting
-                ? "Creating..."
-                : "Create Rule")}
+                  ? "Creating..."
+                  : "Create Rule")}
           </Button>
           {editing && onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="border-slate-300 hover:bg-slate-50"
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>

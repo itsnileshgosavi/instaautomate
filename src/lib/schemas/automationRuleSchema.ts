@@ -3,7 +3,7 @@ import { z } from "zod";
 // Schema for form validation - isActive is required
 export const automationRuleSchema = z.object({
   triggerType: z.enum(["message", "comment", "pvtreply"]),
-  triggerWord: z.string().min(1, "Trigger word is required"),
+  triggerWord: z.string(),
   replyText: z.string().min(1, "Reply text is required"),
   isActive: z.boolean(),
   postId: z.string().nullable().optional(),
@@ -14,7 +14,7 @@ export const automationRuleSchema = z.object({
 // Input schema with optional isActive (for forms)
 export const automationRuleInputSchema = z.object({
   triggerType: z.enum(["message", "comment", "pvtreply"]),
-  triggerWord: z.string().min(1, "Trigger word is required"),
+  triggerWord: z.string(),
   replyText: z.string().min(1, "Reply text is required"),
   isActive: z.boolean(),
   postId: z.string().nullable().optional(),

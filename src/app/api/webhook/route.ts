@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     console.error("Error in webhook handler:", error);
     return NextResponse.json(
       { error: "Failed to process webhook event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -60,7 +60,7 @@ async function handleMessageEvent(event: any) {
     if (!businessUser?.accessToken || !businessUser?.instaUserId) {
       console.error(
         "No access token or IG user ID found for business account:",
-        recipient.id
+        recipient.id,
       );
       return;
     }
@@ -80,7 +80,7 @@ async function handleMessageEvent(event: any) {
       automation?.replyText ||
       (await generateAiResponse(
         message.text || "",
-        process.env.AI_ASSISTANT_PERSONA
+        process.env.AI_ASSISTANT_PERSONA,
       ));
 
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
@@ -89,6 +89,8 @@ async function handleMessageEvent(event: any) {
       recipientId: sender.id,
       message: reply,
       accessToken: businessUser.accessToken,
+      linkText: automation?.linkText || undefined,
+      linkUrl: automation?.linkUrl || undefined,
     });
 
     console.log("Sent auto-reply to message from:", sender.id);

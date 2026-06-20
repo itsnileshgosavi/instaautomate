@@ -1,402 +1,274 @@
 "use client";
-import Image from "next/image";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { useSubscribeMutation } from "@/lib/rtk/subscribe";
-import { toast } from "sonner";
-import AutomationRuleForm from "@/components/AutomationRuleForm";
 
-import {
-  useGetPostsQuery,
-  useGetAutomationsQuery,
-  useCreateAutomationMutation,
-  useUpdateAutomationMutation,
-  useDeleteAutomationMutation,
-  AutomationRule,
-} from "@/lib/slices/apiSlice";
-import {
-  automationRuleSchema,
-  automationRuleInputSchema,
-  AutomationRuleInput,
-} from "@/lib/schemas/automationRuleSchema";
+import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { z } from "zod";
-
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  ArrowRight,
+  BadgeCheck,
+  Bot,
+  ChartNoAxesColumnIncreasing,
+  Globe2,
+  MessageCircle,
+  MessageSquare,
+  Radio,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import Image from "next/image";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  const session = useSession();
+const features = [
+  {
+    title: "DM keyword replies",
+    description:
+      "Trigger instant message responses when followers ask for links, pricing, or support.",
+    icon: MessageSquare,
+  },
+  {
+    title: "Comment automation",
+    description:
+      "Reply to comments publicly or turn high-intent comments into private conversations.",
+    icon: MessageCircle,
+  },
+  {
+    title: "Post-specific rules",
+    description:
+      "Attach automations to individual Instagram posts or keep them global across your account.",
+    icon: Globe2,
+  },
+  {
+    title: "Link delivery",
+    description:
+      "Send anchor text and URLs with replies so campaigns stay measurable and easy to act on.",
+    icon: Zap,
+  },
+  {
+    title: "Simple rule control",
+    description:
+      "Pause, edit, and manage automations from a responsive dashboard built for quick changes.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Creator-ready workflow",
+    description:
+      "Keep launches, lead magnets, and support replies moving without babysitting every thread.",
+    icon: ChartNoAxesColumnIncreasing,
+  },
+];
 
-  const [subscribe] = useSubscribeMutation();
+export default function LandingPage() {
+  const { status } = useSession();
+  const router = useRouter();
+  const isAuthenticated = status === "authenticated";
 
-  // RTK Query hooks
-  const { data: posts = [] } = useGetPostsQuery();
-
-  const {
-    data: automations = [],
-    isLoading,
-    refetch,
-  } = useGetAutomationsQuery();
-  const [createAutomation, { isLoading: isCreating }] =
-    useCreateAutomationMutation();
-  const [updateAutomation, { isLoading: isUpdating }] =
-    useUpdateAutomationMutation();
-  const [deleteAutomation, { isLoading: isDeleting }] =
-    useDeleteAutomationMutation();
-
-  // Form state
-  const [editing, setEditing] = useState<AutomationRule | null>(null);
-
-  const form = useForm<z.infer<typeof automationRuleSchema>>({
-    resolver: zodResolver(automationRuleSchema),
-    defaultValues: {
-      triggerType: "message",
-      triggerWord: "",
-      replyText: "",
-      isActive: true,
-      postId: null,
-      linkText: "",
-      linkUrl: "",
-    },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (values: AutomationRuleInput) => {
-    // convert empty strings to undefined to satisfy Zod/schema and backend
-    const payload = {
-      ...values,
-      linkText: values.linkText?.trim() ? values.linkText : undefined,
-      linkUrl: values.linkUrl?.trim() ? values.linkUrl : undefined,
-    } as AutomationRuleInput;
-    if (editing) {
-      await updateAutomation({ id: editing.id, data: payload });
-      setEditing(null);
-    } else {
-      toast.loading("Creating automation rule...");
-      await createAutomation(payload);
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+      return;
     }
-    form.reset();
-    refetch();
-    toast.success("Automation rule saved successfully");
-  };
 
-  const handleEdit = (rule: AutomationRule) => {
-    setEditing(rule);
-    form.reset({
-      triggerType: rule.triggerType,
-      triggerWord: rule.triggerWord,
-      replyText: rule.replyText,
-      isActive: rule.isActive,
-      postId: rule.postId ?? null,
-      linkText: rule.linkText ?? "",
-      linkUrl: rule.linkUrl ?? "",
-    });
+    signIn("instagram", { callbackUrl: "/dashboard" });
   };
-
-  const handleDelete = async (id: string) => {
-    await deleteAutomation(id);
-    if (editing && editing.id === id) setEditing(null);
-    refetch();
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading automation rules...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-black to-black rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  <Avatar>
-                    <AvatarImage
-                      src={session?.data?.user?.image || ""}
-                      alt={session?.data?.user?.name || ""}
-                    />
-                    <AvatarFallback>
-                      {session?.data?.user?.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-black bg-clip-text text-transparent">
-                  InstaAutomate
-                </h1>
-                <p className="text-sm text-slate-600">
-                  Instagram Automation Platform
-                </p>
-              </div>
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b bg-background/90 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg border bg-card">
+              <Image
+                src="/insta.svg"
+                alt="Instagram"
+                width={26}
+                height={26}
+                className="size-6"
+              />
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:flex items-center space-x-2 text-sm text-slate-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Welcome, {session?.data?.user?.name}</span>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => subscribe()}>
-                Subscribe
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => signOut()}>
-                Sign out
-              </Button>
-            </div>
+            <span className="truncate text-lg font-semibold tracking-tight">
+              InstaAutomate
+            </span>
           </div>
+          <Button variant="outline" size="sm" onClick={handleGetStarted}>
+            {isAuthenticated ? "Dashboard" : "Get Started"}
+            <ArrowRight className="size-4" />
+          </Button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Form Section */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-xl border-0 bg-white/70 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm font-semibold">
-                      {editing ? "✏️" : "➕"}
-                    </span>
+      <section className="border-b">
+        <div className="mx-auto grid min-h-[calc(100vh-73px)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.78fr)] lg:px-8 lg:py-16">
+          <div className="max-w-3xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Radio className="size-3.5 text-primary" />
+              Instagram automation for creators and teams
+            </div>
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+              Turn comments and DMs into automatic conversations.
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Build lightweight Instagram rules that answer keywords, share
+              links, and route followers from comments into DMs without leaving
+              your dashboard.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" onClick={handleGetStarted}>
+                <Image
+                  src="/insta.svg"
+                  alt=""
+                  width={22}
+                  height={22}
+                  className="size-5"
+                />
+                {isAuthenticated
+                  ? "Open Dashboard"
+                  : "Get Started with Instagram"}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() =>
+                  document
+                    .getElementById("features")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                View Features
+              </Button>
+            </div>
+            <div className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+              <div className="flex items-center gap-2">
+                <BadgeCheck className="size-4 text-primary" />
+                No-code rules
+              </div>
+              <div className="flex items-center gap-2">
+                <BadgeCheck className="size-4 text-primary" />
+                DM and comments
+              </div>
+              <div className="flex items-center gap-2">
+                <BadgeCheck className="size-4 text-primary" />
+                Mobile-ready
+              </div>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+            <div className="rounded-lg border bg-card p-4 shadow-sm">
+              <div className="mb-4 flex items-center justify-between gap-3 border-b pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-primary/10 p-2 text-primary">
+                    <Bot className="size-5" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl font-semibold text-slate-800">
-                      {editing ? "Edit Rule" : "Create Rule"}
-                    </CardTitle>
-                    <p className="text-sm text-slate-600 mt-1">
-                      {editing
-                        ? "Modify your automation"
-                        : "Set up a new automation"}
+                    <p className="font-medium">Automation rule</p>
+                    <p className="text-xs text-muted-foreground">
+                      Trigger: "send link"
                     </p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <AutomationRuleForm
-                  form={form}
-                  posts={posts}
-                  isSubmitting={isCreating || isUpdating}
-                  editing={false}
-                  onCancel={() => setEditing(null)}
-                  onSubmit={onSubmit}
-                  submitLabel="Create Rule"
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Rules List Section */}
-          <div className="lg:col-span-2">
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-800">
-                    Automation Rules
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    {automations?.length}{" "}
-                    {automations?.length === 1 ? "rule" : "rules"} configured
+                <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                  Active
+                </span>
+              </div>
+              <div className="grid gap-3">
+                <div className="rounded-md border bg-muted/35 p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Incoming comment
+                  </p>
+                  <p className="mt-2 text-sm">
+                    Can you send the product link?
                   </p>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>
-                    {automations?.filter((rule) => rule.isActive).length} active
-                  </span>
+                <div className="rounded-md border bg-background p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Automatic reply
+                  </p>
+                  <p className="mt-2 text-sm leading-6">
+                    Absolutely. Check your DMs for the link and details.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md border bg-muted/35 p-3">
+                    <p className="text-xs text-muted-foreground">Rules</p>
+                    <p className="mt-1 text-2xl font-semibold">24</p>
+                  </div>
+                  <div className="rounded-md border bg-muted/35 p-3">
+                    <p className="text-xs text-muted-foreground">Active</p>
+                    <p className="mt-1 text-2xl font-semibold">21</p>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="space-y-4">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-slate-600">
-                      Loading automation rules...
-                    </p>
-                  </div>
-                </div>
-              ) : automations?.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
-                      <span className="text-2xl">🤖</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                      No automation rules yet
-                    </h3>
-                    <p className="text-slate-600 text-center max-w-md">
-                      Create your first automation rule to start automatically
-                      responding to messages and comments.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                automations.map((rule) => (
-                  <Card
-                    key={rule.id}
-                    className="shadow-lg border-0 bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-200"
-                  >
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              rule.triggerType === "message"
-                                ? "bg-blue-100 text-blue-600"
-                                : rule.triggerType === "comment"
-                                  ? "bg-purple-100 text-purple-600"
-                                  : "bg-teal-100 text-teal-600"
-                            }`}
-                          >
-                            <span className="text-lg">
-                              {rule.triggerType === "message"
-                                ? "📱"
-                                : rule.triggerType === "comment"
-                                  ? "💬"
-                                  : "🔒"}
-                            </span>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <CardTitle className="text-lg font-semibold text-slate-800">
-                                {rule.triggerType === "message"
-                                  ? "Message"
-                                  : rule.triggerType === "comment"
-                                    ? "Comment"
-                                    : "Private Reply"}{" "}
-                                Automation
-                              </CardTitle>
-                              <div
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  rule.isActive
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-gray-100 text-gray-600"
-                                }`}
-                              >
-                                {rule.isActive ? "Active" : "Paused"}
-                              </div>
-                            </div>
-                            <p className="text-sm text-slate-600">
-                              Triggers when text contains:{" "}
-                              <span className="font-semibold text-slate-800">
-                                "{rule.triggerWord}"
-                              </span>
-                            </p>
-                            {rule.postId ? (
-                              <p className="text-xs mt-1 text-blue-600 font-medium">
-                                📸 Post ID: {rule.postId}
-                              </p>
-                            ) : (
-                              <p className="text-xs mt-1 text-slate-500">
-                                🌐 Global (all posts)
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(rule)}
-                            className="border-slate-300 hover:bg-slate-50"
-                          >
-                            ✏️ Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(rule.id)}
-                            disabled={isDeleting}
-                            className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                          >
-                            🗑️ Delete
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <div className="flex items-start space-x-2">
-                          <span className="text-slate-500 text-sm font-medium mt-0.5">
-                            Reply:
-                          </span>
-                          <p className="text-slate-800 text-sm flex-1 leading-relaxed">
-                            "{rule.replyText}"{" "}
-                            {rule.linkText && rule.linkUrl && (
-                              <span className="ml-2 text-blue-600 underline">
-                                [{rule.linkText}]
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
           </div>
         </div>
-      </main>
-      <Sheet
-        defaultOpen={editing !== null}
-        modal={true}
-        open={editing !== null}
-        onOpenChange={(open) => setEditing(open ? null : editing)}
-      >
-        <SheetContent
-          side="left"
-          className="w-full sm:max-w-[50vw] overflow-auto"
-        >
-          <SheetHeader>
-            <SheetTitle>{editing ? "Edit Rule" : "Create Rule"}</SheetTitle>
-            <SheetDescription>
-              {editing
-                ? "Edit an existing automation rule"
-                : "Create a new automation rule"}
-            </SheetDescription>
-          </SheetHeader>
+      </section>
 
-          <AutomationRuleForm
-            form={form}
-            posts={posts}
-            isSubmitting={isUpdating}
-            editing={editing !== null}
-            onCancel={() => setEditing(null)}
-            onSubmit={onSubmit}
-            submitLabel={"Save Rule"}
-          />
-        </SheetContent>
-      </Sheet>
-    </div>
+      <section id="features" className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mb-8 max-w-2xl">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+            <Sparkles className="size-3.5 text-primary" />
+            Built for everyday Instagram workflows
+          </div>
+          <h2 className="text-3xl font-semibold tracking-tight">
+            Everything you need to automate first responses.
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+            Start with simple trigger words, then refine your automations as
+            your posts, offers, and audience grow.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+
+            return (
+              <Card key={feature.title} className="rounded-lg">
+                <CardHeader className="gap-3">
+                  <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
+                    <Icon className="size-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">{feature.title}</CardTitle>
+                    <CardDescription className="mt-2 leading-6">
+                      {feature.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="border-t">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center lg:px-8">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Ready to automate your next reply?
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Connect Instagram and start building rules from your dashboard.
+            </p>
+          </div>
+          <Button size="lg" onClick={handleGetStarted} className="w-full md:w-auto">
+            <Image
+              src="/insta.svg"
+              alt=""
+              width={22}
+              height={22}
+              className="size-5"
+            />
+            {isAuthenticated ? "Open Dashboard" : "Get Started with Instagram"}
+          </Button>
+        </div>
+      </section>
+    </main>
   );
 }

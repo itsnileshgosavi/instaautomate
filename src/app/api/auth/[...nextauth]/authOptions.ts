@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getLongLIvedToken } from "@/services/getLongLIvedToken";
 import { AuthOptions } from "next-auth";
 import { getInstagramBusinessAccount } from "@/services/getInstaAccount";
+import { subscribeToInstagram } from "@/services/subscribeToInstagram";
 const authOptions: AuthOptions = {
   providers: [
     InstagramProvider({
@@ -46,6 +47,8 @@ const authOptions: AuthOptions = {
               name: name,
             },
           });
+          // Re-subscribe on every login to keep the webhook active
+          await subscribeToInstagram(dbUser.instagramId, longLivedToken);
         }
         // create new user if not found
         if (!dbUser && account.access_token) {
@@ -64,6 +67,8 @@ const authOptions: AuthOptions = {
               image: profilePictureUrl,
             },
           });
+          // Subscribe on first login
+          await subscribeToInstagram(user.id, longLivedToken);
         }
         return true;
       }

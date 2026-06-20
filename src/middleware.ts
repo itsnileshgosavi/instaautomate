@@ -6,19 +6,15 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/webhook") {
-    return NextResponse.next();
-  }
-  // Redirect to login if not authenticated and trying to access protected routes
-  if (!token && pathname !== "/login") {
-    const loginUrl = new URL("/login", request.url);
+  if (!token && pathname.startsWith("/dashboard")) {
+    const loginUrl = new URL("/", request.url);
+    loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect to home if authenticated and trying to access login page
   if (token && pathname === "/login") {
-    const homeUrl = new URL("/", request.url);
-    return NextResponse.redirect(homeUrl);
+    const dashboardUrl = new URL("/dashboard", request.url);
+    return NextResponse.redirect(dashboardUrl);
   }
 
   return NextResponse.next();
