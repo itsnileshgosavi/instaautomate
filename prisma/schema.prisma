@@ -14,37 +14,35 @@ datasource db {
 }
 
 model User {
-  id                 String   @id @default(uuid())
-  name               String?
-  email              String?  @unique
-  phone              String?
-  instagramUsername  String?  @unique
-  instagramId        String   @unique
-  instaUserId        String?  
-  accessToken        String?
-  refreshToken       String?
-  image              String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(uuid())
+  name              String?
+  email             String?  @unique
+  phone             String?
+  instagramUsername String?  @unique
+  instagramId       String   @unique
+  instaUserId       String?
+  accessToken       String?
+  refreshToken      String?
+  image             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  automationRules    AutomationRule[]
+  automationRules AutomationRule[]
 }
 
 model AutomationRule {
-  id           String   @id @default(uuid())
-  userId       String
-  instaUserId  String   // IG account this rule applies to
-  triggerType  String   // 'message' | 'comment'
-  triggerWord  String   // word or phrase to match
-  replyText    String   // reply to send
-  linkText     String?  // anchor text for generic template
-  linkUrl      String?  // URL for generic template button
-  postId       String?   // Instagram post ID to monitor
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(uuid())
+  userId      String
+  instaUserId String // IG account this rule applies to
+  triggerType String // 'message' | 'comment'
+  triggerWord String? // word or phrase to match
+  replyText   String // reply to send
+  linkText    String? // anchor text for generic template
+  linkUrl     String? // URL for generic template button
+  postId      String? // Instagram post ID to monitor
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user         User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
-
-

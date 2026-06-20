@@ -29,11 +29,19 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
-  const { triggerType, triggerWord, replyText, linkText, linkUrl, postId, isActive } = body;
-  if (!triggerType || !triggerWord || !replyText) {
+  const {
+    triggerType,
+    triggerWord,
+    replyText,
+    linkText,
+    linkUrl,
+    postId,
+    isActive,
+  } = body;
+  if (!triggerType || !replyText) {
     return NextResponse.json(
       { error: "Missing required fields" },
-      { status: 400 }
+      { status: 400 },
     );
   }
   const user = await prisma.user.findUnique({
