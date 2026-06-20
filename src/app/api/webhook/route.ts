@@ -71,9 +71,15 @@ async function handleMessageEvent(event: any) {
         instaUserId: recipient.id,
         triggerType: "message",
         isActive: true,
-        triggerWord: { mode: "insensitive", contains: message.text || "" },
+        OR: [
+          {
+            triggerWord: { mode: "insensitive", contains: message.text || "" },
+          },
+          { triggerWord: "" },
+          { triggerWord: null },
+        ],
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ triggerWord: "desc" }, { createdAt: "desc" }],
     });
 
     const reply =
@@ -130,9 +136,18 @@ async function handleCommentEvent(commentData: any, id: string) {
         instaUserId: id,
         postId: commentData.media?.id || commentData.media_id || "",
         isActive: true,
-        triggerWord: { mode: "insensitive", contains: commentData.text || "" },
+        OR: [
+          {
+            triggerWord: {
+              mode: "insensitive",
+              contains: commentData.text || "",
+            },
+          },
+          { triggerWord: "" },
+          { triggerWord: null },
+        ],
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ triggerWord: "desc" }, { createdAt: "desc" }],
     });
 
     if (!automation) {
