@@ -83,6 +83,11 @@ async function handleMessageEvent(event: any) {
         process.env.AI_ASSISTANT_PERSONA,
       ));
 
+    if (!reply) {
+      console.error("No reply generated for message:", message.text);
+      return;
+    }
+
     // Send auto-reply using your IG business user ID as sender, sender.id as recipient
     await instagramApi.sendMessage({
       instaAccountId: businessUser.instagramId,

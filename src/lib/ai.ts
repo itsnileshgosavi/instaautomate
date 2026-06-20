@@ -1,69 +1,59 @@
-import { GoogleGenerativeAI, type Content } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
+
 /**
- * Generate an AI-powered reply using Google Gemini API with OpenAI fallback.
+ * Generate an AI-powered reply using Google Gemini with Groq as fallback.
+ * If both APIs fail or their keys are missing, returns null (no reply sent).
+ *
  * @param userMessage The incoming user message or comment text.
- * @param context Optional persona or additional context, e.g. "You are the personal assistant of XYZ creator".
+ * @param context     Optional persona / system instruction.
  */
 export async function generateAiResponse(
   userMessage: string,
   context?: string,
-): Promise<string> {
-  const persona = context?.trim() ||
+): Promise<string | null> {
+  const persona =
+    context?.trim() ||
     "You are a helpful Instagram assistant for a business account. Keep responses short, friendly and on-brand.";
 
-  // Try Google Gemini first via SDK ---------------------------------------
+  // ── 1. Google Gemini (gemini-2.0-flash-lite — cheapest & fastest free tier) ──
   const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
   if (geminiKey) {
     try {
-      // Defer import so build succeeds if dependency not installed yet
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
       const generation = await model.generateContent({
         systemInstruction: { role: "system", parts: [{ text: persona }] },
         contents: [{ role: "user", parts: [{ text: userMessage }] }],
       });
-      
       const text = generation.response.text();
       if (text) return text.trim();
     } catch (err) {
-      console.error("Gemini SDK call failed", err);
+      console.error("[AI] Gemini call failed:", err);
     }
   }
 
-  // OpenAI fallback -------------------------------------------------------
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (openaiKey) {
+  // ── 2. Groq fallback (llama-3.1-8b-instant — free, ultra-fast) ──────────────
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) {
     try {
-      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openaiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: persona },
-            { role: "user", content: userMessage },
-          ],
-          temperature: 0.7,
-          max_tokens: 100,
-        }),
+      const groq = new Groq({ apiKey: groqKey });
+      const chat = await groq.chat.completions.create({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: persona },
+          { role: "user", content: userMessage },
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
       });
-      if (openaiRes.ok) {
-        const resJson: any = await openaiRes.json();
-        const answer = resJson.choices?.[0]?.message?.content;
-        if (answer) return answer.trim();
-      } else {
-        console.error("OpenAI API error", await openaiRes.text());
-      }
+      const text = chat.choices[0]?.message?.content;
+      if (text) return text.trim();
     } catch (err) {
-      console.error("OpenAI request failed", err);
+      console.error("[AI] Groq call failed:", err);
     }
   }
 
-  // Final fallback --------------------------------------------------------
-  return "Thank you for reaching out! We'll get back to you soon.";
+  // Both APIs failed or keys are missing — caller decides what to do
+  return null;
 }
